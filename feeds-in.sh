@@ -1,9 +1,10 @@
 #!/bin/bash
 
-source "$SCRIPT_DIR/unredirector.sh"
+
 APPDIR="/home/steven/apps/ArchiveBox-Docker"
 RAWDIR="$APPDIR/rawdata"
 DATADIR="$APPDIR/data"
+source "$APPDIR/unredirector.sh"
 
 
 if [ ! -d "$RAWDIR" ]; then
@@ -30,39 +31,34 @@ wget "https://rss.stevesaus.me/public.php?op=rss&id=-2&view-mode=all_articles&ke
 time=`date +_%Y%m%d_%H%M%S` 
 OUTFILE=$(printf "%s/parsed%s.txt" "$DATADIR" "$time")
 
-#looping through files in rawdir
+#looping through files in rawdir; this also allows you to slap a file of 
+#urls (one per line) and have it get picked up and processed on the next run
 files=$(ls -A "$RAWDIR")
-for f in $files;do
 
+for f in $files;do
+    echo "$f"
     
-    #second loop
-    
+    #looping through each file    
     while read line; do
     url=$(printf "%s" "$line")
     unredirector #because $url is now set
-    if [ ! -z "$url" ];then  #yup, that url exists
-        printf "%s" "$url" >> "$DATADIR/parsed
+    if [ ! -z "$url" ];then  #yup, that url exists; just skipping if it doesn't
+        printf "%s" "$url" >> "$OUTFILE"
+    fi 
+    done < "$RAWDIR/$f"
     
-    fi
-    # reading each line and doing stuff
-    echo "Line No. $n : $line"
-    n=$((n+1))
-    done < $filename
-
-
-    echo "Processing ${p%.*}..."
-    send_funct=$(echo "${p%.*}_send")
-    source "$SCRIPT_DIR/out_enabled/$p"
-    echo "$SCRIPT_DIR/out_enabled/$p"
-    eval ${send_funct}
-    sleep 5
+    # Removing the temporary file will go here after testing
 done
 
-docker-compose exec archivebox /bin/archive data/ideatrash.txt
-docker-compose exec archivebox /bin/archive data/shaarli.txt
-docker-compose exec archivebox /bin/archive data/wallabag.txt
-docker-compose exec archivebox /bin/archive data/ttrss.txt
-docker-compose exec archivebox /bin/archive data/full_ideatrash.txt
+# Maybe this should be written to a string and use eval? Not sure.
+#docker-compose exec archivebox /bin/archive data/"$OUTFILE"
+
+# for later, looping and then cleaning the output file
+#docker-compose exec archivebox /bin/archive data/ideatrash.txt
+#docker-compose exec archivebox /bin/archive data/shaarli.txt
+#docker-compose exec archivebox /bin/archive data/wallabag.txt
+#docker-compose exec archivebox /bin/archive data/ttrss.txt
+#docker-compose exec archivebox /bin/archive data/full_ideatrash.txt
 
 
 
