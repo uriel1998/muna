@@ -16,7 +16,7 @@ function unredirector {
         code=$(echo "$headers" | head -1 | awk '{print $2}')
         if [ -z "$code" ];then
             echo "[error] Web page is gone and not in Internet Archive!" >&2;
-            echo "[error] For page $firsturl"
+            echo "[error] For page $firsturl" >&2;
             url=""  # Removing invalid variable.
             firsturl="" #cleaning up mess
         else

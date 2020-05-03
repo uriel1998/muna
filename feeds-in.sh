@@ -1,11 +1,14 @@
 #!/bin/bash
 
 
+##############################################################################
+# Initi
+##############################################################################
+
 APPDIR="/home/steven/apps/ArchiveBox-Docker"
 RAWDIR="$APPDIR/rawdata"
 DATADIR="$APPDIR/data"
 source "$APPDIR/unredirector.sh"
-
 
 if [ ! -d "$RAWDIR" ]; then
     mkdir -p "$RAWDIR"
@@ -14,6 +17,29 @@ fi
 if [ ! -d "$DATADIR" ]; then
     mkdir -p "$DATADIR"
 fi
+
+
+##############################################################################
+# Progress bar
+# From https://github.com/fearside/ProgressBar/
+##############################################################################
+
+function ProgressBar {
+# Process data
+    let _progress=(${1}*100/${2}*100)/100
+    let _done=(${_progress}*4)/10
+    let _left=40-$_done
+# Build progressbar string lengths
+    _fill=$(printf "%${_done}s")
+    _empty=$(printf "%${_left}s")
+
+# 1.2 Build progressbar strings and print the ProgressBar line
+# 1.2.1 Output example:                           
+# 1.2.1.1 Progress : [########################################] 100%
+printf "\rProgress : [${_fill// /#}${_empty// /-}] ${_progress}%%"
+
+}
+
 
 
 wget https://shaarli.stevesaus.me/?do=atom -O- | grep -e "<link href" | awk -F '"' '{print $2}' > $RAWDIR/shaarli.txt
@@ -35,19 +61,24 @@ OUTFILESHORT=$(printf "data/parsed%s.txt" "$time")
 #urls (one per line) and have it get picked up and processed on the next run
 files=$(ls -A "$RAWDIR")
 
+totallines=$(wc -l "$RAWDIR/$f")
+
 for f in $files;do
     echo "$f"
+    i = 0
     
     #looping through each file    
     while read line; do
-    line=$(echo "$line" | grep -e "^h")  #additional error checking for files just chucked in
-    if [ ! -z "$line" ];then 
-        url=$(printf "%s" "$line")
-        unredirector #because $url is now set
-        if [ ! -z "$url" ];then  #yup, that url exists; just skipping if it doesn't
-            echo "$url" >> "$OUTFILE"
-        fi 
-    fi
+        ProgressBar $i $totallines
+        line=$(echo "$line" | grep -e "^h")  #additional error checking for files just chucked in
+        if [ ! -z "$line" ];then 
+            url=$(printf "%s" "$line")
+            unredirector #because $url is now set
+            if [ ! -z "$url" ];then  #yup, that url exists; just skipping if it doesn't
+                echo "$url" >> "$OUTFILE"
+            fi 
+        fi
+        ((i++)
     done < "$RAWDIR/$f"
     
     # Removing the temporary file will go here after testing
