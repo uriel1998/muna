@@ -18,19 +18,19 @@ fi
 
 wget https://shaarli.stevesaus.me/?do=atom -O- | grep -e "<link href" | awk -F '"' '{print $2}' > $RAWDIR/shaarli.txt
 
-wget https://bag.faithcollapsing.com/ssaus/kJ8VHqEOOfzkp7/unread.xml -O- | grep -e "<link>" | awk -F '>' '{print $2}' | awk -F '<' '{print $1}' > $RAWDIR/data/wallabag.txt
+wget https://bag.faithcollapsing.com/ssaus/kJ8VHqEOOfzkp7/unread.xml -O- | grep -e "<link>" | awk -F '>' '{print $2}' | awk -F '<' '{print $1}' | grep -e "^h" > $RAWDIR/data/wallabag.txt
 
-wget https://ideatrash.net/feed -O- | grep -e "<link>" | awk -F '>' '{print $2}' | awk -F '<' '{print $1}' > $RAWDIR/ideatrash.txt
+wget https://ideatrash.net/feed -O- | grep -e "<link>" | awk -F '>' '{print $2}' | awk -F '<' '{print $1}' | grep -e "^h"  > $RAWDIR/ideatrash.txt
 
-wget https://ideatrash.net/sitemap-1.xml -O- | sed -e 's:<url>:\n<url>:g' | sed -e 's:.*<loc>\(.*\)</loc>.*:\1:g' > $RAWDIR/full_ideatrash.txt
+wget https://ideatrash.net/sitemap-1.xml -O- | sed -e 's:<url>:\n<url>:g' | sed -e 's:.*<loc>\(.*\)</loc>.*:\1:g' | grep -e "^h" > $RAWDIR/full_ideatrash.txt
 
-wget "https://rss.stevesaus.me/public.php?op=rss&id=-2&view-mode=all_articles&key=9u5pdo5e07852179fb9" -O- | grep -e "<link href" | awk -F '"' '{print $2}' > $RAWDIR/ttrss.txt
+wget "https://rss.stevesaus.me/public.php?op=rss&id=-2&view-mode=all_articles&key=9u5pdo5e07852179fb9" -O- | grep -e "<link href" | awk -F '"' '{print $2}' | grep -e "^h" > $RAWDIR/ttrss.txt
 
 
 # So that there aren't collisions or overwriting
 time=`date +_%Y%m%d_%H%M%S` 
 OUTFILE=$(printf "%s/parsed%s.txt" "$DATADIR" "$time")
-
+OUTFILESHORT=$(printf "data/parsed%s.txt" "$time")
 #looping through files in rawdir; this also allows you to slap a file of 
 #urls (one per line) and have it get picked up and processed on the next run
 files=$(ls -A "$RAWDIR")
@@ -51,7 +51,7 @@ for f in $files;do
 done
 
 # Maybe this should be written to a string and use eval? Not sure.
-#docker-compose exec archivebox /bin/archive data/"$OUTFILE"
+#docker-compose exec archivebox /bin/archive "$OUTFILESHORT"
 
 # for later, looping and then cleaning the output file
 #docker-compose exec archivebox /bin/archive data/ideatrash.txt
