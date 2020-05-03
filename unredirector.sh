@@ -26,7 +26,7 @@ function unredirector {
         if echo "$code" | grep -q -e "3[0-9][0-9]";then
             echo "[info] HTTP $code redirect"    
             resulturl=""
-            resulturl=$(wget -q -O- --server-response "$url" 2>&1 | grep "^Location" | tail -1 | awk -F ' ' '{print $2}')
+            resulturl=$(wget -O- --server-response "$url" 2>&1 | grep "^Location" | tail -1 | awk -F ' ' '{print $2}')
             if [ -z "$resulturl" ]; then
                 echo "[info] No new location found" 
                 resulturl=$(echo "$url")
