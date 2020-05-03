@@ -4,7 +4,7 @@
 # variable.  So there's no real "return" other than setting that var.
 
 function unredirector {
-    headers=$(curl -s --fail --connect-timeout 20 --location -sS --head "$url")
+    headers=$(curl -k -s --fail --connect-timeout 20 --location -sS --head "$url")
     code=$(echo "$headers" | head -1 | awk '{print $2}')
     
     #check for null as well
@@ -14,7 +14,7 @@ function unredirector {
         fi
         firsturl="$url"
         url=$(printf "https://web.archive.org/web/*/%s" "$url")
-        headers=$(curl -s --fail --connect-timeout 20 --location -sS --head "$url")
+        headers=$(curl -k -s --fail --connect-timeout 20 --location -sS --head "$url")
         code=$(echo "$headers" | head -1 | awk '{print $2}')
         if [ -z "$code" ];then
             echo "[error] Web page is gone and not in Internet Archive!" >&2;
@@ -32,7 +32,7 @@ function unredirector {
                 echo "[info] HTTP $code redirect"    
             fi
             resulturl=""
-            resulturl=$(wget -O- --server-response "$url" 2>&1 | grep "^Location" | tail -1 | awk -F ' ' '{print $2}')
+            resulturl=$(wget -T 20 -O- --server-response "$url" 2>&1 | grep "^Location" | tail -1 | awk -F ' ' '{print $2}')
             if [ -z "$resulturl" ]; then
                 if [ $OUTPUT = 1 ];then  
                     echo "[info] No new location found" 
@@ -46,7 +46,7 @@ function unredirector {
                 if [ $OUTPUT = 1 ];then  
                     echo "[info] REprocessing $url" 
                 fi
-                headers=$(curl -s --connect-timeout 20 --location -sS --head "$url")
+                headers=$(curl -k -s --connect-timeout 20 --location -sS --head "$url")
                 code=$(echo "$headers" | head -1 | awk '{print $2}')
                 if echo "$code" | grep -q -e "3[0-9][0-9]";then
                     if [ $OUTPUT = 1 ];then  
