@@ -63,14 +63,14 @@ OUTFILESHORT=$(printf "data/parsed%s.txt" "$time")
 #urls (one per line) and have it get picked up and processed on the next run
 files=$(ls -A "$RAWDIR")
 
-
-
 for f in $files; do
     echo "$f"
-    i = 0
+    let i=0
     totallines=$(wc -l "$RAWDIR/$f")
+    
     #looping through each file    
     while read line; do
+        ((i++))
         ProgressBar $i $totallines
         line=$(echo "$line" | grep -e "^h")  #additional error checking for files just chucked in
         if [ ! -z "$line" ];then 
@@ -80,7 +80,7 @@ for f in $files; do
                 echo "$url" >> "$OUTFILE"
             fi 
         fi
-        ((i++)
+    
     done < "$RAWDIR/$f"
     
     # Removing the temporary file will go here after testing
