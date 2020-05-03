@@ -64,7 +64,7 @@ OUTFILESHORT=$(printf "data/parsed%s.txt" "$time")
 files=$(ls -A "$RAWDIR")
 
 for f in $files; do
-    echo "$f"
+    echo "[info] Processing $f"
     let i=0
     totallines=$(wc -l "$RAWDIR/$f")
     
@@ -84,10 +84,14 @@ for f in $files; do
     done < "$RAWDIR/$f"
     
     # Removing the temporary file will go here after testing
+    # rm "$RAWDIR/$f"
 done
 
-# Maybe this should be written to a string and use eval? Not sure.
-#docker-compose exec archivebox /bin/archive "$OUTFILESHORT"
+#for f in $files; do
+    # Maybe this should be written to a string and use eval? Not sure.
+    #docker-compose exec archivebox /bin/archive "$OUTFILESHORT"
+    #rm "$OUTFILE"
+#done
 
 # for later, looping and then cleaning the output file
 #docker-compose exec archivebox /bin/archive data/ideatrash.txt
