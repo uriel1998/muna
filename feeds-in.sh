@@ -41,7 +41,7 @@ for f in $files;do
     #looping through each file    
     while read line; do
     line=$(echo "$line" | grep -e "^h")  #additional error checking for files just chucked in
-    if [ ! -z "$line"];then 
+    if [ ! -z "$line" ];then 
         url=$(printf "%s" "$line")
         unredirector #because $url is now set
         if [ ! -z "$url" ];then  #yup, that url exists; just skipping if it doesn't
