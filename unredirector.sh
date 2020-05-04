@@ -4,27 +4,44 @@
 # variable.  So there's no real "return" other than setting that var.
 
 function unredirector {
+    
+    #Explainer/reminder - curl will return 404 error codes *unless* you have 
+    # --fail set, in which case you get the error code. That's done here so 
+    # that it handles 404 and missing server exactly the same way, while 
+    # letting the 300 level codes pass through normally.
+    
     headers=$(curl -k -s --fail --connect-timeout 20 --location -sS --head "$url")
     code=$(echo "$headers" | head -1 | awk '{print $2}')
     
-    #check for null as well
+    #checks for null as well
     if [ -z "$code" ];then
         if [ $OUTPUT = 1 ];then  
             echo "[info] Page/server not found, trying Internet Archive" >&2;
         fi
         firsturl="$url"
-        url=$(printf "https://web.archive.org/web/*/%s" "$url")
-        headers=$(curl -k -s --fail --connect-timeout 20 --location -sS --head "$url")
-        code=$(echo "$headers" | head -1 | awk '{print $2}')
-        if [ -z "$code" ];then
-            echo "[error] Web page is gone and not in Internet Archive!" >&2;
-            echo "[error] For page $firsturl" >&2;
-            url=""  # Removing invalid variable.
-            firsturl="" #cleaning up mess
+        
+        #In the JSON the Internet Archive returns, the string 
+        # "archived_snapshots": {}  
+        # is returned if it does not exist in the Archive either.
+        
+        api_ia=$(curl -s http://archive.org/wayback/available?url="$url")
+        NotExists=$(echo "$api_ia" | grep -c -e '"archived_snapshots": {}')
+        if [ "$NotExists" != "0" ];then
+            #TODO - errors and exiting when standalone
+            if [ $OUTPUT = 1 ];then  
+                echo "[error] Web page is gone and not in Internet Archive!" >&2;
+                echo "[error] For page $firsturl" >&2;
+                #resetting variable here for error trapping.
+                url=""
+                firsturl="" #cleaning up mess
+            fi
         else
             if [ $OUTPUT = 1 ];then  
-                echo "[info] Found on internet archive." 
+                echo "[info] Fetching Internet Archive version of" >&2;
+                echo "[info] page $firsturl" >&2;
             fi
+            url=$(echo "$api_ia" | awk -F 'url": "' '{print $2}' 2>/dev/null | awk -F '", "' '{print $1}' | awk -F '"' '{print $1}')
+            firsturl="" #cleaning up mess
         fi
     else
         if echo "$code" | grep -q -e "3[0-9][0-9]";then
@@ -79,12 +96,22 @@ if [ "$?" -eq "0" ];then
     OUTPUT=0
 else
     OUTPUT=1
-    if [ -z "$1" ];then
+    if [ "$#" = 0 ];then
         echo "Please call this as a function or with the url as the first argument."
     else
-        echo "$1"
-        url="$1"
-        unredirector    
+        if [ "$1" != "-q" ];then
+            echo "$1"
+            url="$1"
+        else
+            echo "$2"
+            url="$2"
+            OUTPUT=0
+        fi
+        unredirector
+        if [ ! -z "$url" ];then
+            # If it gets here, it has to be standalone
+            echo "$url"    
+        fi
     fi
 fi
 
