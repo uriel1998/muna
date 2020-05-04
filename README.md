@@ -24,8 +24,9 @@ I ended up writing this because of [ArchiveBox](https://github.com/pirate/Archiv
 a great self-hosted archiving system, but when you throw a random list of URLs
 (or worse, different types of RSS feeds) at it, you get... *mixed* results. It 
 does not handle redirects too well, and if something is just 404, you're out of 
-luck.  So I wrote `feeds-in` to preprocess inputs. It's included here as a 
-use example of how to use `muna` and the bash function `unredirect`.
+luck.  So I wrote `feeds-in` to preprocess inputs from both persnickety RSS 
+feeds and a plain list of URLs. It's included here as a use example of how to 
+use `muna` and the bash function `unredirect`.
 
 `muna` is an old norse word meaning "call to mind, remember".
 
@@ -63,7 +64,7 @@ script to meet your needs.
 One important and *super* useful note for someone who already has a big list of 
 URLs from some other program: All you have to do is put that text file, one URL 
 per line, in `RAWDIR` (which you'll configure here in a second) and that list 
-will be pulled seamlessly into the workflow
+will be pulled seamlessly into the workflow.
 
 If you are using `feeds-in.sh` with `ArchiveBox`, you will need to edit 
 these lines as appropriate for you:

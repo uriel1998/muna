@@ -52,19 +52,20 @@ printf "\rProgress : [${_fill// /#}${_empty// /-}] ${_progress}%%"
 #I would like to use curl here, but it misbehaves with some urls, oddly.
 #Stream not closed cleanly, that sort of thing.
 
-#temporarily
-#wget -T 20 https://shaarli.stevesaus.me/?do=atom -O- | grep -e "<link href" | awk -F '"' '{print $2}' > $RAWDIR/shaarli.txt
+# An example of a shaarli instance RSS feed
+wget -T 20 https://my.shaarli.com/?do=atom -O- | grep -e "<link href" | awk -F '"' '{print $2}' > $RAWDIR/shaarli.txt
 
-#temporarily
-#wget -T 20 https://bag.faithcollapsing.com/ssaus/kJ8VHqEOOfzkp7/unread.xml -O- | grep -e "<link>" | awk -F '>' '{print $2}' | awk -F '<' '{print $1}' | grep -e "^h" > $RAWDIR/wallabag.txt
+# An example of a wallabag RSS feed
+wget -T 20 https://my.wallabag.com/username/myfakekey/unread.xml -O- | grep -e "<link>" | awk -F '>' '{print $2}' | awk -F '<' '{print $1}' | grep -e "^h" > $RAWDIR/wallabag.txt
 
+# An example of a Wordpress blog feed
 wget -T 20 https://ideatrash.net/feed -O- | grep -e "<link>" | awk -F '>' '{print $2}' | awk -F '<' '{print $1}' | grep -e "^h"  > $RAWDIR/ideatrash.txt
 
-#temporarily
-#wget -T 20 https://ideatrash.net/sitemap-1.xml -O- | sed -e 's:<url>:\n<url>:g' | sed -e 's:.*<loc>\(.*\)</loc>.*:\1:g' | grep -e "^h" > $RAWDIR/full_ideatrash.txt
+# An example of a Wordpress sitemap
+wget -T 20 https://ideatrash.net/sitemap-1.xml -O- | sed -e 's:<url>:\n<url>:g' | sed -e 's:.*<loc>\(.*\)</loc>.*:\1:g' | grep -e "^h" > $RAWDIR/full_ideatrash.txt
 
-#temporarily
-#wget -T 20 "https://rss.stevesaus.me/public.php?op=rss&id=-2&view-mode=all_articles&key=9u5pdo5e07852179fb9" -O- | grep -e "<link href" | awk -F '"' '{print $2}' | grep -e "^h" > $RAWDIR/ttrss.txt
+# An example of a TT-RSS "published" feed.
+wget -T 20 "https://my.ttrss-install.com/public.php?op=rss&id=-2&view-mode=all_articles&key=myfakekey" -O- | grep -e "<link href" | awk -F '"' '{print $2}' | grep -e "^h" > $RAWDIR/ttrss.txt
 
 
 ################################END PARTS TO EDIT###########################
