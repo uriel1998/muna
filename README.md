@@ -39,7 +39,11 @@ This project is licensed under the Apache License. For the full license, see `LI
 * awk
 * curl 
 * wget
+* sed
 
+On many linux installations these may already be installed; if not, they're 
+in your package manager.  (If you have to build *these* from source, you don't 
+need *me* telling you how to do that!)
 
 ## 4. Installation
 
@@ -52,7 +56,9 @@ call/source it explicitly.
 ### feeds-in.sh
 
 While this script is included here as an example, it is a fully functional 
-DEATH ST... script. It's a functional script, appropriate to put in a cronjob.
+DEATH ST... script. It's a functional script, appropriate to put in a cronjob 
+to preprocess sources of URLs for `ArchiveBox`.  Or use it as the base of a 
+script to meet your needs.
 
 If you are using `feeds-in.sh` with `ArchiveBox`, you will need to edit 
 these lines as appropriate for you:
@@ -96,6 +102,8 @@ don't confuse them!  (I won't tell you how I know... sigh.)
 
 ## 5. Usage
 
+### muna
+
 If there's a redirect, whether from a shortener or, say, redirected to HTTPS, 
 `muna` will follow that and change the variable `"$url"` (or return to STDOUT) 
 the appropriate URL. If there is any other error (including if the page is gone or 
@@ -129,6 +137,13 @@ exiting with the exit code `99`.
             fi     
 ```
 
+### feeds-in.sh
+
+    `bash ./feeds-in.sh`
+    
+    Seriously, that's it. If you edited things in the script to meet your 
+    system, then you should be done.
+    
 ## 6. TODO
 
 
