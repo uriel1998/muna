@@ -40,10 +40,10 @@ This project is licensed under the Apache License. For the full license, see `LI
 ## 3. Prerequisites
 
 * bash
-* find
-* sed 
-* sort
-* cut
+* awk
+* curl 
+* wget
+
 
 ## 4. Installation
 

@@ -27,13 +27,10 @@ function unredirector {
         api_ia=$(curl -s http://archive.org/wayback/available?url="$url")
         NotExists=$(echo "$api_ia" | grep -c -e '"archived_snapshots": {}')
         if [ "$NotExists" != "0" ];then
-            #TODO - errors and exiting when standalone
+            SUCCESS=1 #that is, not a success
             if [ $OUTPUT = 1 ];then  
                 echo "[error] Web page is gone and not in Internet Archive!" >&2;
                 echo "[error] For page $firsturl" >&2;
-                #resetting variable here for error trapping.
-                url=""
-                firsturl="" #cleaning up mess
             fi
         else
             if [ $OUTPUT = 1 ];then  
@@ -41,7 +38,7 @@ function unredirector {
                 echo "[info] page $firsturl" >&2;
             fi
             url=$(echo "$api_ia" | awk -F 'url": "' '{print $2}' 2>/dev/null | awk -F '", "' '{print $1}' | awk -F '"' '{print $1}')
-            firsturl="" #cleaning up mess
+            firsturl=$(echo "") #cleaning up mess
         fi
     else
         if echo "$code" | grep -q -e "3[0-9][0-9]";then
@@ -100,15 +97,14 @@ else
         echo "Please call this as a function or with the url as the first argument."
     else
         if [ "$1" != "-q" ];then
-            echo "$1"
             url="$1"
         else
-            echo "$2"
             url="$2"
             OUTPUT=0
         fi
+        SUCCESS=0
         unredirector
-        if [ ! -z "$url" ];then
+        if [ $SUCCESS -eq 0 ];then
             # If it gets here, it has to be standalone
             echo "$url"    
         fi
