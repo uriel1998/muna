@@ -60,6 +60,11 @@ DEATH ST... script. It's a functional script, appropriate to put in a cronjob
 to preprocess sources of URLs for `ArchiveBox`.  Or use it as the base of a 
 script to meet your needs.
 
+One important and *super* useful note for someone who already has a big list of 
+URLs from some other program: All you have to do is put that text file, one URL 
+per line, in `RAWDIR` (which you'll configure here in a second) and that list 
+will be pulled seamlessly into the workflow
+
 If you are using `feeds-in.sh` with `ArchiveBox`, you will need to edit 
 these lines as appropriate for you:
 
@@ -72,14 +77,19 @@ source "$APPDIR/muna.sh"
 ```
 
 `APPDIR` should be to your `ArchiveBox` installation. `RAWDIR` is a work 
-directory. `DATADIR` should be the data directory of your `ArchiveBox` 
-installation.
+directory where you can also put any text file with a plain list of URLs. 
+`DATADIR` should be the data directory of your `ArchiveBox` installation.
 
 There are several example feeds (starting around line 50). Each strips that 
 particular RSS feed (or XML sitemap) down to a series of URLs, one per line, 
-written in a text file.  The console output here is a progress bar unless 
-there are errors. The text file is time-date stamped to avoid collisions and 
-overwrites.
+written in a text file.  
+
+The `sed` and `awk` strings are left here as an example for these particular 
+kinds of feeds. Feel free to use them as a starting point, but I won't guarantee 
+they work for *your* feeds, they just work for *these* feeds.
+
+The console output here is a progress bar unless there are errors. The text 
+file is time-date stamped to avoid collisions and overwrites.
 
 Then `feeds-in.sh` calls `ArchiveBox` to import that list of URLs. Uncomment 
 the appropriate line in this section for your style of installation. Note that 
