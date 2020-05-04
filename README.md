@@ -31,6 +31,10 @@ it will follow that and return (or save, if using `ArchiveBox`) the
 appropriate URL. If there is any other error (including if the page is gone or 
 the server has disappeared), it will 
 
+
+...i'm gonna rename the scripts, aren't I, lol.  And emphasize unredirector, and 
+use the archivebox bit as an example of how to use it.
+
 `muna` is an old norse word meaning call to mind, remember
 
 ## 2. License
