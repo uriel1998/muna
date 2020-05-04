@@ -98,8 +98,7 @@ for f in $files; do
     
     done < "$RAWDIR/$f"
     
-    # Removing the temporary file will go here after testing
-    # rm "$RAWDIR/$f"
+    rm "$RAWDIR/$f"
 done
 
 for f in $files; do
@@ -115,15 +114,5 @@ for f in $files; do
     # Uncomment the next line for docker *NOT DOCKER COMPOSE* installations
     #cat "$OUTFILE" | docker run -i -v ~/ArchiveBox:/data nikisweeting/archivebox
     
-    #rm "$OUTFILE"
+    rm "$OUTFILE"
 done
-
-# for later, looping and then cleaning the output file
-#docker-compose exec archivebox /bin/archive data/ideatrash.txt
-#docker-compose exec archivebox /bin/archive data/shaarli.txt
-#docker-compose exec archivebox /bin/archive data/wallabag.txt
-#docker-compose exec archivebox /bin/archive data/ttrss.txt
-#docker-compose exec archivebox /bin/archive data/full_ideatrash.txt
-
-
-
