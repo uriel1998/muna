@@ -27,7 +27,7 @@ does not handle redirects too well, and if something is just 404, you're out of
 luck.  So I wrote `feeds-in` to preprocess inputs. It's included here as a 
 use example of how to use `muna` and the bash function `unredirect`.
 
-`muna` is an old norse word meaning call to mind, remember
+`muna` is an old norse word meaning "call to mind, remember".
 
 ## 2. License
 
@@ -87,16 +87,16 @@ the *docker-compose* and standalone *docker* commands are quite different;
 don't confuse them!  (I won't tell you how I know... sigh.)
 
 ```
-    ###############################START PARTS TO EDIT########################
+###############################START PARTS TO EDIT########################
 
-    # Uncomment the next line for non-docker installations
-    #./archive /"$OUTFILESHORT"    
+# Uncomment the next line for non-docker installations
+#./archive /"$OUTFILESHORT"    
 
-    # Uncomment the next line for docker-compose installations   
-    docker-compose exec archivebox /bin/archive /"$OUTFILESHORT"
-    
-    # Uncomment the next line for docker *NOT DOCKER COMPOSE* installations
-    #cat "$OUTFILE" | docker run -i -v ~/ArchiveBox:/data nikisweeting/archivebox
+# Uncomment the next line for docker-compose installations   
+docker-compose exec archivebox /bin/archive /"$OUTFILESHORT"
+
+# Uncomment the next line for docker *NOT DOCKER COMPOSE* installations
+#cat "$OUTFILE" | docker run -i -v ~/ArchiveBox:/data nikisweeting/archivebox
     
 ```
 
@@ -114,35 +114,34 @@ exiting with the exit code `99`.
 
 ### Standalone
 
-    `muna.sh [-q] URL`
+`muna.sh [-q] URL`
 
  * -q : If run standalone, it will return nothing to STDOUT except for the unredirected URL. Some error messages may print to STDERR.
 
 ### As a function
 
-    Put this line at the top of your script.
+Put this line at the top of your script.
 
-    `source path/to/muna`
+`source path/to/muna`
     
-    In your script, the variable `$url` must be set before calling the function 
-    `unredirect`. Afterward, if a successful match was made, `$url` will be 
-    set appropriately. If no match was made, `$url` will be set to NULL. Like
-    this example in `feeds-in.sh`.
+In your script, the variable `$url` must be set before calling the function 
+`unredirect`. Afterward, if a successful match was made, `$url` will be 
+set appropriately. If no match was made, `$url` will be set to NULL. Like
+this example in `feeds-in.sh`.
     
 ```
-            url=$(printf "%s" "$line")
-            unredirector 
-            if [ ! -z "$url" ];then  #yup, that url exists
-                echo "$url" >> "$OUTFILE"
-            fi     
+url=$(printf "%s" "$line")
+unredirector 
+if [ ! -z "$url" ];then  #yup, that url exists
+    echo "$url" >> "$OUTFILE"
+fi     
 ```
 
 ### feeds-in.sh
 
-    `bash ./feeds-in.sh`
+`bash ./feeds-in.sh`
     
-    Seriously, that's it. If you edited things in the script to meet your 
-    system, then you should be done.
+Seriously, that's it. If you edited things in the script to meet your system, then you should be done.
     
 ## 6. TODO
 
