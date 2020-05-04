@@ -2,7 +2,7 @@
 
 Clean a series of links, resolving redirects and finding Wayback results if page is gone
 
-![agaetr logo](https://raw.githubusercontent.com/uriel1998/muna/master/muna-open-graph.png "logo")
+![muna logo](https://raw.githubusercontent.com/uriel1998/muna/master/muna-open-graph.png "logo")
 
 ## Contents
  1. [About](#1-about)
