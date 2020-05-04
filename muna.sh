@@ -40,7 +40,7 @@ function unredirector {
                 echo "[info] page $firsturl" >&2;
             fi
             url=$(echo "$api_ia" | awk -F 'url": "' '{print $2}' 2>/dev/null | awk -F '", "' '{print $1}' | awk -F '"' '{print $1}')
-            unset -v $firsturl
+            unset -v firsturl
         fi
     else
         if echo "$code" | grep -q -e "3[0-9][0-9]";then
