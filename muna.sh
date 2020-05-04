@@ -1,5 +1,12 @@
 #!/bin/bash
   
+##############################################################################
+# muna, by Steven Saus 3 May 2020
+# steven@stevesaus.com
+# Licenced under the Apache License
+##############################################################################  
+  
+  
 # because this is a bash function, it's using the variable $url as the returned
 # variable.  So there's no real "return" other than setting that var.
 
