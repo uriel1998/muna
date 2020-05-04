@@ -5,10 +5,12 @@
 # Initi
 ##############################################################################
 
+################################START PARTS TO EDIT###########################
 APPDIR="/home/steven/apps/ArchiveBox-Docker"
 RAWDIR="$APPDIR/rawdata"
 DATADIR="$APPDIR/data"
-source "$APPDIR/unredirector.sh"
+source "$APPDIR/muna.sh"
+################################END PARTS TO EDIT#############################
 
 if [ ! -d "$RAWDIR" ]; then
     mkdir -p "$RAWDIR"
@@ -40,20 +42,32 @@ printf "\rProgress : [${_fill// /#}${_empty// /-}] ${_progress}%%"
 
 }
 
+##############################################################################
+#  Pulling in and formatting feeds
+##############################################################################
+
+
+################################START PARTS TO EDIT###########################
 
 #I would like to use curl here, but it misbehaves with some urls, oddly.
 #Stream not closed cleanly, that sort of thing.
 
-wget -T 20 https://shaarli.stevesaus.me/?do=atom -O- | grep -e "<link href" | awk -F '"' '{print $2}' > $RAWDIR/shaarli.txt
+#temporarily
+#wget -T 20 https://shaarli.stevesaus.me/?do=atom -O- | grep -e "<link href" | awk -F '"' '{print $2}' > $RAWDIR/shaarli.txt
 
-wget -T 20 https://bag.faithcollapsing.com/ssaus/kJ8VHqEOOfzkp7/unread.xml -O- | grep -e "<link>" | awk -F '>' '{print $2}' | awk -F '<' '{print $1}' | grep -e "^h" > $RAWDIR/wallabag.txt
+#temporarily
+#wget -T 20 https://bag.faithcollapsing.com/ssaus/kJ8VHqEOOfzkp7/unread.xml -O- | grep -e "<link>" | awk -F '>' '{print $2}' | awk -F '<' '{print $1}' | grep -e "^h" > $RAWDIR/wallabag.txt
 
 wget -T 20 https://ideatrash.net/feed -O- | grep -e "<link>" | awk -F '>' '{print $2}' | awk -F '<' '{print $1}' | grep -e "^h"  > $RAWDIR/ideatrash.txt
 
-wget -T 20 https://ideatrash.net/sitemap-1.xml -O- | sed -e 's:<url>:\n<url>:g' | sed -e 's:.*<loc>\(.*\)</loc>.*:\1:g' | grep -e "^h" > $RAWDIR/full_ideatrash.txt
+#temporarily
+#wget -T 20 https://ideatrash.net/sitemap-1.xml -O- | sed -e 's:<url>:\n<url>:g' | sed -e 's:.*<loc>\(.*\)</loc>.*:\1:g' | grep -e "^h" > $RAWDIR/full_ideatrash.txt
 
-wget -T 20 "https://rss.stevesaus.me/public.php?op=rss&id=-2&view-mode=all_articles&key=9u5pdo5e07852179fb9" -O- | grep -e "<link href" | awk -F '"' '{print $2}' | grep -e "^h" > $RAWDIR/ttrss.txt
+#temporarily
+#wget -T 20 "https://rss.stevesaus.me/public.php?op=rss&id=-2&view-mode=all_articles&key=9u5pdo5e07852179fb9" -O- | grep -e "<link href" | awk -F '"' '{print $2}' | grep -e "^h" > $RAWDIR/ttrss.txt
 
+
+################################END PARTS TO EDIT###########################
 
 # So that there aren't collisions or overwriting
 time=`date +_%Y%m%d_%H%M%S` 
@@ -87,11 +101,21 @@ for f in $files; do
     # rm "$RAWDIR/$f"
 done
 
-#for f in $files; do
-    # Maybe this should be written to a string and use eval? Not sure.
-    #docker-compose exec archivebox /bin/archive "$OUTFILESHORT"
+for f in $files; do
+    
+    ###############################START PARTS TO EDIT########################
+
+    # Uncomment the next line for non-docker installations
+    #./archive /"$OUTFILESHORT"    
+
+    # Uncomment the next line for docker-compose installations   
+    docker-compose exec archivebox /bin/archive /"$OUTFILESHORT"
+    
+    # Uncomment the next line for docker *NOT DOCKER COMPOSE* installations
+    #cat "$OUTFILE" | docker run -i -v ~/ArchiveBox:/data nikisweeting/archivebox
+    
     #rm "$OUTFILE"
-#done
+done
 
 # for later, looping and then cleaning the output file
 #docker-compose exec archivebox /bin/archive data/ideatrash.txt
