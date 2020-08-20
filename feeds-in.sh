@@ -73,6 +73,8 @@ wget -T 20 https://ideatrash.net/sitemap-1.xml -O- | sed -e 's:<url>:\n<url>:g' 
 # An example of a TT-RSS "published" feed.
 wget -T 20 "https://my.ttrss-install.com/public.php?op=rss&id=-2&view-mode=all_articles&key=myfakekey" -O- | grep -e "<link href" | awk -F '"' '{print $2}' | grep -e "^h" > $RAWDIR/ttrss.txt
 
+# An example of a Feedburner feed
+wget -T 20 http://feeds.feedburner.com/OnePanicAttackAtATime -O- | sed -e 's.<feedburner:origLink>.\n\n<feedburner:origLink>.g' | sed -e 's@.*<feedburner:origLink>\(.*\)</feedburner:origLink>.*@\1@g' | grep -e "^h" > $RAWDIR/onepanicattack.txt
 
 ################################END PARTS TO EDIT###########################
 
