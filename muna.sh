@@ -11,13 +11,12 @@
 # variable.  So there's no real "return" other than setting that var.
 
 function unredirector {
-    
     #Explainer/reminder - curl will return 404 error codes *unless* you have 
     # --fail set, in which case you get the error code. That's done here so 
     # that it handles 404 and missing server exactly the same way, while 
     # letting the 300 level codes pass through normally.
     
-    headers=$(curl -k -s --fail --connect-timeout 20 --location -sS --head "$url")
+    headers=$(curl -k -s --fail -m 5 --location -sS --head "$url")
     code=$(echo "$headers" | head -1 | awk '{print $2}')
     
     #checks for null as well
@@ -55,7 +54,7 @@ function unredirector {
                 echo "[info] HTTP $code redirect"    
             fi
             resulturl=""
-            resulturl=$(wget -T 20 -O- --server-response "$url" 2>&1 | grep "^Location" | tail -1 | awk -F ' ' '{print $2}')
+            resulturl=$(wget -T 5 -O- --server-response "$url" 2>&1 | grep "^Location" | tail -1 | awk -F ' ' '{print $2}')
             if [ -z "$resulturl" ]; then
                 if [ $OUTPUT = 1 ];then  
                     echo "[info] No new location found" 
@@ -69,7 +68,7 @@ function unredirector {
                 if [ $OUTPUT = 1 ];then  
                     echo "[info] REprocessing $url" 
                 fi
-                headers=$(curl -k -s --connect-timeout 20 --location -sS --head "$url")
+                headers=$(curl -k -s -m 5 --location -sS --head "$url")
                 code=$(echo "$headers" | head -1 | awk '{print $2}')
                 if echo "$code" | grep -q -e "3[0-9][0-9]";then
                     if [ $OUTPUT = 1 ];then  
