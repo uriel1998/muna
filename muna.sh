@@ -45,7 +45,7 @@ function unredirector {
                 echo "[info] Fetching Internet Archive version of" >&2;
                 echo "[info] page $firsturl" >&2;
             fi
-            url=$(echo "$api_ia" | awk -F 'url": "' '{print $2}' 2>/dev/null | awk -F '", "' '{print $1}' | awk -F '"' '{print $1}')
+            url=$(echo "$api_ia" | awk -F 'url": "' '{print $3}' 2>/dev/null | awk -F '", "' '{print $1}' | awk -F '"' '{print $1}')
             unset -v firsturl
         fi
     else
