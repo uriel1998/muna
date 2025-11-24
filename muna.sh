@@ -33,7 +33,7 @@ strip_tracking_url() {
         --silent
         --location
         --max-time 5
-        --connect-timeout 3
+        --connect-timeout 5
         --output /dev/null
         --write-out '%{url_effective}'
     )
