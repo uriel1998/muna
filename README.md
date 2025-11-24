@@ -125,9 +125,10 @@ exiting with the exit code `99`.
 
 ### Standalone
 
-`muna.sh [-q] URL`
+`muna.sh [-q | --loud] URL`
 
- * -q : If run standalone, it will return nothing to STDOUT except for the unredirected URL. Some error messages may print to STDERR.
+* -q : If run standalone, it will return nothing to STDOUT except for the unredirected URL. Some error messages may print to STDERR. This is now the default behavior, but retaining this switch will do nothing.
+* --loud : If run standalone, will output verbose stuff.
 
 ### As a function
 
