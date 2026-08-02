@@ -9,11 +9,16 @@
 export SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
 
 
+
 function loud() {
+##############################################################################
+# loud outputs on stderr
+##############################################################################
     if [ "${LOUD:-0}" -eq 1 ];then
-        echo "$@"
-    fi
+		echo "$@" 1>&2
+	fi
 }
+
 
 
 strip_tracking_url() {
@@ -23,7 +28,7 @@ strip_tracking_url() {
     local orig_effective clean_effective
 
     if [ -z "${url}" ]; then
-        printf 'Usage: strip_tracking_url "URL"\n' >&2
+        loud 'Usage: strip_tracking_url "URL"\n'
         return 1
     fi
 
