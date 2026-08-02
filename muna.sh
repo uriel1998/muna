@@ -227,7 +227,10 @@ function unredirector {
                 printf '%s\n' "${headers}" \
                 | grep -i "^[[:space:]]*Location:" \
                 | tail -1 \
-                | sed -e 's/^[[:space:]]*Location:[[:space:]]*//I' -e 's/\r$//'
+                | sed \
+                    -e 's/^[[:space:]]*Location:[[:space:]]*//I' \
+                    -e 's/[[:space:]]*\[following\][[:space:]]*$//' \
+                    -e 's/\r$//'
             )"
             if [ -z "${resulturl}" ]; then
                 loud "[info] No new location found"
@@ -235,6 +238,7 @@ function unredirector {
             else
                 loud "[info] New location found"
                 url="${resulturl}"
+                strip_tracking_url
                 loud "[info] REprocessing ${url}"
                 headers="$(curl -k -s -m 5 --location -sS --head "${url}")"
                 code="$(printf '%s\n' "${headers}" | head -1 | awk '{print $2}')"
@@ -261,6 +265,46 @@ unredirect() {
     unredirector "$@"
 }
 
+parse_args() {
+##############################################################################
+# Standalone option parser. Allows flags before or after the URL.
+##############################################################################
+    LOUD=0
+    url=""
+
+    while [ "$#" -gt 0 ]; do
+        case "$1" in
+            -q)
+                ;;
+            --loud)
+                LOUD=1
+                ;;
+            --)
+                shift
+                if [ "$#" -gt 0 ] && [ -z "${url}" ]; then
+                    url="${1}"
+                fi
+                break
+                ;;
+            -*)
+                echo "Unknown option: $1" 1>&2
+                return 1
+                ;;
+            *)
+                if [ -z "${url}" ]; then
+                    url="${1}"
+                else
+                    echo "Unexpected extra argument: $1" 1>&2
+                    return 1
+                fi
+                ;;
+        esac
+        shift
+    done
+
+    [ -n "${url}" ]
+}
+
 
 ##############################################################################
 # Are we sourced?
@@ -277,22 +321,15 @@ else
         echo "Please call this as a function or with the url as the first argument."
         exit 99
     else
-        if [ "${1}" == "-q" ];then
-            # backwards compatability, this is now default behavior
-            shift
+        if ! parse_args "$@"; then
+            echo "Usage: muna.sh [-q] [--loud] URL" 1>&2
+            exit 99
         fi
-        if [ "${1}" == "--loud" ];then
-            LOUD=1
-            shift
-        else
-            LOUD=0
-        fi
-        url="${1}"
         SUCCESS=0
         strip_tracking_url
         unredirector
-        strip_tracking_url
-        if [ $SUCCESS -eq 0 ];then
+        if [ "${SUCCESS}" -eq 0 ];then
+            strip_tracking_url
             # If it gets here, it has to be standalone
             echo "$url"
         else
