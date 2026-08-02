@@ -6,7 +6,8 @@
 # Licenced under the Apache License
 ##############################################################################
 
-export SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
+SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
+export SCRIPT_DIR
 
 
 
@@ -25,7 +26,6 @@ strip_tracking_url() {
 	# because this is a bash function, it's using the variable $url as the returned
 	# variable.  So there's no real "return" other than setting that var.
     local base_no_frag frag path qs cleaned_qs cleaned_url
-    local orig_effective clean_effective
 
     if [ -z "${url}" ]; then
         loud 'Usage: strip_tracking_url "URL"\n'
@@ -104,9 +104,65 @@ strip_tracking_url() {
 	fi
 }
 
+fetch_wayback_capture() {
+##############################################################################
+# Replace $url with the latest Wayback capture, or clear it on failure.
+##############################################################################
+    local firsturl encoded_url api_ia archive_url
+
+    firsturl="${url}"
+    loud "[info] Trying Internet Archive for ${firsturl}"
+
+    encoded_url="$(
+        printf '%s' "${firsturl}" \
+        | sed \
+            -e 's/%/%25/g' \
+            -e 's/ /%20/g' \
+            -e 's/#/%23/g' \
+            -e 's/&/%26/g' \
+            -e 's/+/%2B/g' \
+            -e 's/?/%3F/g' \
+            -e 's/=/%3D/g'
+    )"
+
+    api_ia="$(
+        wget \
+            --quiet \
+            --timeout=5 \
+            --tries=1 \
+            --no-check-certificate \
+            -erobots=off \
+            --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:140.0) Gecko/20100101 Firefox/140.0" \
+            -O - \
+            "https://archive.org/wayback/available?url=${encoded_url}"
+    )"
+
+    archive_url="$(
+        printf '%s\n' "${api_ia}" \
+        | grep -o '"url":"[^"]*"' \
+        | head -1 \
+        | sed -e 's/^"url":"//' -e 's/"$//'
+    )"
+
+    if [ -z "${archive_url}" ]; then
+        SUCCESS=1
+        url=""
+        loud "[error] Web page is gone and not in Internet Archive!"
+        loud "[error] For page ${firsturl}"
+        return 1
+    fi
+
+    url="${archive_url}"
+    SUCCESS=0
+    loud "[info] Using Internet Archive version"
+    loud "[info] ${url}"
+    return 0
+}
+
 function unredirector {
     # because this is a bash function, it's using the variable $url as the returned
     # variable.  So there's no real "return" other than setting that var.
+    SUCCESS=0
 
     # Handle Squarespace / similar redirectors that embed the real URL in ?u=
     # Example:
@@ -161,52 +217,17 @@ function unredirector {
     )"
     #checks for null as well
     if [ -z "${code}" ]; then
-        loud "[info] Page/server not found, trying Internet Archive"
-        firsturl="${url}"
-        #In the JSON the Internet Archive returns, the string
-        # "archived_snapshots": {}
-        # is returned if it does not exist in the Archive either.
-        # swapping out for wget
-        #api_ia=$(curl -s http://archive.org/wayback/available?url="$url")
-        api_ia="$(
-            wget \
-                --quiet \
-                --timeout=5 \
-                --tries=1 \
-                --no-check-certificate \
-                -erobots=off \
-                --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:140.0) Gecko/20100101 Firefox/140.0" \
-                -O - \
-                "http://archive.org/wayback/available?url=${url}"
-        )"
-
-        NotExists="$(printf '%s\n' "${api_ia}" | grep -c -e '"archived_snapshots": {}')"
-        if [ "${NotExists}" != "0" ]; then
-            SUCCESS=1 #that is, not a success
-            loud "[error] Web page is gone and not in Internet Archive!"
-            loud "[error] For page ${firsturl}"
-            unset -v "${url}"
-            unset -v "${firsturl}"
-        else
-            loud "[info] Fetching Internet Archive version of"
-            loud "[info] page ${firsturl}"
-            url="$(
-                printf '%s\n' "${api_ia}" \
-                | awk -F 'url": "' '{print $3}' 2>/dev/null \
-                | awk -F '", "' '{print $1}' \
-                | awk -F '"' '{print $1}'
-            )"
-            unset -v firsturl
-        fi
+        fetch_wayback_capture
+        return $?
     else
         if printf '%s\n' "${code}" | grep -q -e "3[0-9][0-9]"; then
             loud "[info] HTTP ${code} redirect"
             resulturl=""
             resulturl="$(
                 printf '%s\n' "${headers}" \
-                | grep "^Location" \
+                | grep -i "^[[:space:]]*Location:" \
                 | tail -1 \
-                | awk '{print $2}'
+                | sed -e 's/^[[:space:]]*Location:[[:space:]]*//I' -e 's/\r$//'
             )"
             if [ -z "${resulturl}" ]; then
                 loud "[info] No new location found"
@@ -224,8 +245,20 @@ function unredirector {
         fi
         if printf '%s\n' "${code}" | grep -q -e "2[0-9][0-9]"; then
             loud "[info] HTTP ${code} exists"
+            return 0
         fi
     fi
+
+    loud "[info] HTTP ${code} unavailable, trying Internet Archive"
+    fetch_wayback_capture
+    return $?
+}
+
+unredirect() {
+##############################################################################
+# Backward-compatible name documented in the README.
+##############################################################################
+    unredirector "$@"
 }
 
 
@@ -237,10 +270,7 @@ function unredirector {
 # Try to execute a `return` statement,
 # but do it in a sub-shell and catch the results.
 # If this script isn't sourced, that will raise an error.
-$(return >/dev/null 2>&1)
-
-# What exit code did that give?
-if [ "$?" -eq "0" ];then
+if ( return 0 2>/dev/null );then
     loud "[info] Function undirector ready to go."
 else
     if [ "$#" = 0 ];then
