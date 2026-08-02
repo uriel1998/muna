@@ -134,16 +134,16 @@ exiting with the exit code `99`.
 
 Put this line at the top of your script.
 
-`source path/to/muna`
+`source path/to/muna.sh`
     
 In your script, the variable `$url` must be set before calling the function 
-`unredirect`. Afterward, if a successful match was made, `$url` will be 
+`unredirect` (or the older `unredirector`). Afterward, if a successful match was made, `$url` will be 
 set appropriately. If no match was made, `$url` will be set to NULL. Like
 this example in `feeds-in.sh`.
     
 ```
 url=$(printf "%s" "$line")
-unredirector 
+unredirect 
 if [ ! -z "$url" ];then  #yup, that url exists
     echo "$url" >> "$OUTFILE"
 fi     
@@ -159,4 +159,3 @@ Seriously, that's it. If you edited things in the script to meet your system, th
 
 
 ### Roadmap:
-
