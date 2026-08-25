@@ -132,7 +132,7 @@ fetch_wayback_capture() {
             --tries=1 \
             --no-check-certificate \
             -erobots=off \
-            --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:140.0) Gecko/20100101 Firefox/140.0" \
+            --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:154.0) Gecko/20100101 Firefox/154.0" \
             -O - \
             "https://archive.org/wayback/available?url=${encoded_url}"
     )"
@@ -146,9 +146,9 @@ fetch_wayback_capture() {
 
     if [ -z "${archive_url}" ]; then
         SUCCESS=1
-        url=""
+        url="${firsturl}"
         loud "[error] Web page is gone and not in Internet Archive!"
-        loud "[error] For page ${firsturl}"
+        loud "[error] Keeping original URL for page ${firsturl}"
         return 1
     fi
 
@@ -196,13 +196,14 @@ function unredirector {
     fi
 
     # switching to wget b/c reasons
-    local ua="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:140.0) Gecko/20100101 Firefox/140.0"
+    local ua="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:154.0) Gecko/20100101 Firefox/154.0"
     local headers
     headers="$(
         wget \
-            --spider \
+            --spider --quiet \
             --server-response \
             --timeout=10 \
+            --tries=1 \
             --max-redirect=20 \
             --no-check-certificate \
             -erobots=off \
@@ -215,10 +216,27 @@ function unredirector {
         printf '%s\n' "${headers}" \
         | awk '/HTTP\/[0-9.]* / {print $2; exit}'
     )"
+    # Some sites do not yield a parseable HTTP status via wget spider.
+    # Retry with curl before concluding the page is unavailable.
+    if [ -z "${code}" ]; then
+        loud "[warn] wget probe returned no HTTP status; retrying with curl"
+        headers="$(
+            curl \
+                -k -sS -I -L \
+                --max-time 15 \
+                --connect-timeout 10 \
+                -A "${ua}" \
+                "${url}" 2>&1
+        )"
+        code="$(
+            printf '%s\n' "${headers}" \
+            | awk '/^HTTP\/[0-9.]+ / {last=$2} END {print last}'
+        )"
+    fi
     #checks for null as well
     if [ -z "${code}" ]; then
-        fetch_wayback_capture
-        return $?
+        loud "[warn] Could not determine HTTP status; keeping original URL"
+        return 0
     else
         if printf '%s\n' "${code}" | grep -q -e "3[0-9][0-9]"; then
             loud "[info] HTTP ${code} redirect"
